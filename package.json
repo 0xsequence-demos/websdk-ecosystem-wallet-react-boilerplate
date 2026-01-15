@@ -1,5 +1,5 @@
 {
-  "name": "websdk-embedded-wallet-react-boilerplate",
+  "name": "websdk-ecosystem-wallet-react-boilerplate",
   "private": false,
   "version": "0.0.0",
   "type": "module",
@@ -9,12 +9,14 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "preview": "vite preview",
-    "postinstall": "(cp -n .env.example .env) || echo already exists"
+    "postinstall": "(cp -n .env.example .env) || echo already exists",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
-    "0xsequence": "2.3.38",
     "@0xsequence-demos/boilerplate-design-system": "^0.2.7",
-    "@0xsequence/connect": "^5.4.8",
+    "@0xsequence/connect": "6.0.0-beta.0",
+    "@0xsequence/wallet-primitives": "3.0.0-beta.9",
     "@0xsequence/network": "^2.3.38",
     "@tanstack/react-query": "^5.90.12",
     "ethers": "6.16.0",
@@ -37,6 +39,7 @@
     "eslint-plugin-react-hooks": "7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
+    "@playwright/test": "^1.49.1",
     "prettier": "^3.7.4",
     "tailwindcss": "^4.1.17",
     "typescript": "^5.9.3",

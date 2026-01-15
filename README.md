@@ -1,6 +1,6 @@
-# Sequence WebSDK Embedded Wallet React Starter Boilerplate
+# Sequence WebSDK Ecosystem Wallet React Starter Boilerplate
 
-Starter Sequence Embedded Wallet boilerplate that uses [Sequence WebSDK](https://github.com/0xsequence/web-sdk) with React.
+Starter Sequence Ecosystem Wallet boilerplate that uses [Sequence WebSDK](https://github.com/0xsequence/web-sdk) with React.
 
 ## Quickstart
 
@@ -18,4 +18,4 @@ pnpm install && pnpm dev
 
 The app will start on `localhost:4444`
 
-To provide your own keys from [Sequence Builder](https://sequence.build/), simply edit the `.env` file accordingly.
+To provide your own keys from [Sequence Builder](https://sequence.build/), simply edit the `.env` file accordingly. You'll also need the URL for your Ecosystem Wallet.
