@@ -71,6 +71,7 @@ function App() {
             subvariants={{ padding: "comfortable" }}
             onClick={handleConnect}
             disabled={isButtonDisabled}
+            data-testid="connect-button"
           >
             {buttonLabel}
           </Button>

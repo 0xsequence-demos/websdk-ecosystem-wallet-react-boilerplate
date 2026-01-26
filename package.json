@@ -11,7 +11,10 @@
     "preview": "vite preview",
     "postinstall": "(cp -n .env.example .env) || echo already exists",
     "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui"
+    "test:e2e:ui": "playwright test --ui",
+    "test:unit": "vitest run",
+    "test:unit:watch": "vitest --watch",
+    "test:all": "pnpm test:unit && pnpm test:e2e"
   },
   "dependencies": {
     "@0xsequence-demos/boilerplate-design-system": "^0.2.7",
@@ -40,10 +43,15 @@
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
     "@playwright/test": "^1.49.1",
+    "@testing-library/jest-dom": "^6.6.4",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
     "prettier": "^3.7.4",
+    "jsdom": "^26.0.0",
     "tailwindcss": "^4.1.17",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.49.0",
+    "vitest": "^2.1.9",
     "vite": "^7.2.7"
   },
   "packageManager": "pnpm@9.5.0+sha512.140036830124618d624a2187b50d04289d5a087f326c9edfc0ccd733d76c4f52c3a313d4fc148794a2a9d81553016004e6742e8cf850670268a7387fc220c903"

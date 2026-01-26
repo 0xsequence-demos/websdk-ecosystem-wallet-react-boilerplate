@@ -15,6 +15,7 @@ export function Connected() {
         <Group title="User info">
           <Card
             style={{ gap: "1rem", display: "flex", flexDirection: "column" }}
+            data-testid="missing-info"
           >
             Missing information (
             {[
@@ -38,6 +39,7 @@ export function Connected() {
           collapsable
           title="Sign message"
           data-id="sign-message"
+          data-testid="sign-message-card"
           className="bg-white/10 border border-white/10 backdrop-blur-sm"
         >
           <TestSignMessage />
@@ -47,6 +49,7 @@ export function Connected() {
           collapsable
           title="Verify message"
           data-id="verify-message"
+          data-testid="verify-message-card"
           className="bg-white/10 border border-white/10 backdrop-blur-sm"
         >
           <TestVerifyMessage chainId={chainId} />
@@ -56,6 +59,7 @@ export function Connected() {
           collapsable
           title="Mint NFT"
           data-id="send-transaction"
+          data-testid="mint-nft-card"
           className="bg-white/10 border border-white/10 backdrop-blur-sm"
         >
           <TestMintNFT chainId={chainId} />

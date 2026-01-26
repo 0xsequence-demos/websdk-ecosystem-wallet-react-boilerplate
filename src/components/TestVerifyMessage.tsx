@@ -100,6 +100,7 @@ const TestVerifyMessage = (props: { chainId: number }) => {
           schema={schemaVerifyMessage}
           onAction={handleVerifyMessage}
           className="flex flex-col gap-4"
+          data-testid="verify-message-form"
         >
           <FormErrors />
           <Field name="address">
@@ -130,7 +131,7 @@ const TestVerifyMessage = (props: { chainId: number }) => {
           </Button>
         </Form>
       ) : (
-        <Card className="flex flex-col">
+        <Card className="flex flex-col" data-testid="verify-message-result">
           <div className="flex flex-1 items-center justify-center flex-col gap-4">
             <VerificationStatus isValidSignature={value} />
             <Button

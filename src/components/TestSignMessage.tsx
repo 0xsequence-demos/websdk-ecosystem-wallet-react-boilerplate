@@ -45,6 +45,7 @@ const TestSignMessage = () => {
           schema={schemaSignMessage}
           onAction={handleSignMessage}
           className="flex flex-col gap-4 col-start-1 row-start-1 data-[visible='false']:invisible"
+          data-testid="sign-message-form"
         >
           <InputText name="message" />
 
@@ -59,7 +60,10 @@ const TestSignMessage = () => {
           </Button>
         </Form>
       ) : (
-        <Card className="col-start-1 row-start-1 data-[visible='false']:hidden flex flex-col items-start gap-4">
+        <Card
+          className="col-start-1 row-start-1 data-[visible='false']:hidden flex flex-col items-start gap-4"
+          data-testid="sign-message-summary"
+        >
           <dl className="flex flex-col gap-4 w-full">
             <div className="flex flex-col">
               <dt className="text-14 text-grey-100 ">Address</dt>

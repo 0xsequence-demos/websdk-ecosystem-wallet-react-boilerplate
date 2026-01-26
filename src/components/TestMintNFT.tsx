@@ -116,7 +116,7 @@ const TestMintNFT = (props: { chainId: number }) => {
 
   return (
     <>
-      <Card className="flex flex-col gap-4">
+      <Card className="flex flex-col gap-4" data-testid="mint-nft-card">
         <div>
           <span className="text-17">
             Mint NFT on {network?.name ?? "Unknown network"}
@@ -146,7 +146,7 @@ const TestMintNFT = (props: { chainId: number }) => {
       </Card>
 
       {isTxnInvalid ? (
-        <Card className="flex flex-col gap-4">
+        <Card className="flex flex-col gap-4" data-testid="mint-nft-error">
           <dl className="flex flex-col gap-4">
             <div className="flex flex-col">
               <dt className="text-14 text-grey-100">
@@ -162,7 +162,7 @@ const TestMintNFT = (props: { chainId: number }) => {
       ) : null}
 
       {isTxnValid ? (
-        <Card className="flex flex-col gap-4">
+        <Card className="flex flex-col gap-4" data-testid="mint-nft-success">
           <dl className="flex flex-col gap-4">
             <div className="flex flex-col">
               <dt className="text-14 text-grey-100">
