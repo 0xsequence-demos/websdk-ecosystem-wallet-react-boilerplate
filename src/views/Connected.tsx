@@ -2,7 +2,7 @@ import { useAccount } from "wagmi";
 
 import TestSignMessage from "../components/TestSignMessage";
 import TestVerifyMessage from "../components/TestVerifyMessage";
-import TestSendTransaction from "../components/TestSendTransaction";
+import TestMintNFT from "../components/TestMintNFT";
 
 import { Group, Card } from "@0xsequence-demos/boilerplate-design-system";
 
@@ -54,11 +54,11 @@ export function Connected() {
 
         <Card
           collapsable
-          title="Send transaction"
+          title="Mint NFT"
           data-id="send-transaction"
           className="bg-white/10 border border-white/10 backdrop-blur-sm"
         >
-          <TestSendTransaction chainId={chainId} />
+          <TestMintNFT chainId={chainId} />
         </Card>
       </Group>
     </div>

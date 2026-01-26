@@ -13,7 +13,7 @@ const installMockWallet = async (page: Page, status: MockWalletStatus) => {
       };
       window.open = (url) => {
         const parsedUrl = new URL(
-          typeof url === "string" ? url : url?.toString?.() ?? "",
+          typeof url === "string" ? url : (url?.toString?.() ?? ""),
           window.location.origin,
         );
         const walletOrigin = parsedUrl.origin;
