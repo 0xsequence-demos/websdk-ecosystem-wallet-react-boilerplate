@@ -28,8 +28,6 @@ export default defineConfig({
       VITE_E2E: "true",
       VITE_PROJECT_ACCESS_KEY: "test_access_key",
       VITE_WALLET_APP_URL: baseURL,
-      VITE_CHAINS: "1",
-      VITE_DEFAULT_CHAIN: "1",
     },
   },
 });
