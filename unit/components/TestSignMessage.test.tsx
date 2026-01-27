@@ -1,6 +1,14 @@
+import type { ComponentPropsWithoutRef, FormEventHandler } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import TestSignMessage from "../../src/components/TestSignMessage";
+
+type FormProps = ComponentPropsWithoutRef<"form"> & {
+  onAction?: FormEventHandler<HTMLFormElement>;
+};
+type ButtonProps = ComponentPropsWithoutRef<"button">;
+type InputProps = ComponentPropsWithoutRef<"input">;
+type CardProps = ComponentPropsWithoutRef<"div"> & { collapsable?: boolean };
 
 vi.mock("wagmi", () => ({
   useAccount: vi.fn(),
@@ -8,18 +16,19 @@ vi.mock("wagmi", () => ({
 }));
 
 vi.mock("@0xsequence-demos/boilerplate-design-system", () => ({
-  Form: ({ children, onAction, ...props }: any) => (
+  Form: ({ children, onAction, ...props }: FormProps) => (
     <form onSubmit={onAction} {...props}>
       {children}
     </form>
   ),
-  Button: ({ children, ...props }: any) => (
+  Button: ({ children, ...props }: ButtonProps) => (
     <button {...props}>{children}</button>
   ),
-  InputText: (props: any) => <input {...props} />,
-  Card: ({ children, collapsable, ...props }: any) => (
-    <div {...props}>{children}</div>
-  ),
+  InputText: (props: InputProps) => <input {...props} />,
+  Card: ({ children, collapsable, ...props }: CardProps) => {
+    void collapsable;
+    return <div {...props}>{children}</div>;
+  },
   useStoreData: vi.fn(),
   setStoreData: vi.fn(),
   useForm: vi.fn(),

@@ -1,33 +1,47 @@
+import type { ComponentPropsWithoutRef, FormEventHandler } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import TestVerifyMessage from "../../src/components/TestVerifyMessage";
+
+type FormProps = ComponentPropsWithoutRef<"form"> & {
+  onAction?: FormEventHandler<HTMLFormElement>;
+};
+type ButtonProps = ComponentPropsWithoutRef<"button">;
+type DivProps = ComponentPropsWithoutRef<"div">;
+type InputProps = ComponentPropsWithoutRef<"input">;
+type LabelProps = ComponentPropsWithoutRef<"label">;
+type CardProps = ComponentPropsWithoutRef<"div"> & { collapsable?: boolean };
+type SvgProps = ComponentPropsWithoutRef<"span"> & { name?: string };
 
 vi.mock("wagmi", () => ({
   usePublicClient: vi.fn(),
 }));
 
 vi.mock("@0xsequence-demos/boilerplate-design-system", () => ({
-  Form: ({ children, onAction, ...props }: any) => (
+  Form: ({ children, onAction, ...props }: FormProps) => (
     <form onSubmit={onAction} {...props}>
       {children}
     </form>
   ),
-  Button: ({ children, ...props }: any) => (
+  Button: ({ children, ...props }: ButtonProps) => (
     <button {...props}>{children}</button>
   ),
-  Field: ({ children, ...props }: any) => <div {...props}>{children}</div>,
-  Input: (props: any) => <input {...props} />,
-  Label: ({ children, ...props }: any) => <label {...props}>{children}</label>,
-  Card: ({ children, collapsable, ...props }: any) => (
+  Field: ({ children, ...props }: DivProps) => <div {...props}>{children}</div>,
+  Input: (props: InputProps) => <input {...props} />,
+  Label: ({ children, ...props }: LabelProps) => (
+    <label {...props}>{children}</label>
+  ),
+  Card: ({ children, collapsable, ...props }: CardProps) => {
+    void collapsable;
+    return <div {...props}>{children}</div>;
+  },
+  FormErrors: ({ children, ...props }: DivProps) => (
     <div {...props}>{children}</div>
   ),
-  FormErrors: ({ children, ...props }: any) => (
+  FieldError: ({ children, ...props }: DivProps) => (
     <div {...props}>{children}</div>
   ),
-  FieldError: ({ children, ...props }: any) => (
-    <div {...props}>{children}</div>
-  ),
-  Svg: ({ name, ...props }: any) => <span data-name={name} {...props} />,
+  Svg: ({ name, ...props }: SvgProps) => <span data-name={name} {...props} />,
   useStoreData: vi.fn(),
   setStoreData: vi.fn(),
   useForm: vi.fn(),

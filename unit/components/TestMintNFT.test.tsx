@@ -1,3 +1,4 @@
+import type { ComponentPropsWithoutRef, FormEventHandler } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import TestMintNFT from "../../src/components/TestMintNFT";
@@ -7,18 +8,25 @@ vi.mock("wagmi", () => ({
   useWriteContract: vi.fn(),
 }));
 
+type FormProps = ComponentPropsWithoutRef<"form"> & {
+  onAction?: FormEventHandler<HTMLFormElement>;
+};
+type ButtonProps = ComponentPropsWithoutRef<"button">;
+type CardProps = ComponentPropsWithoutRef<"div"> & { collapsable?: boolean };
+
 vi.mock("@0xsequence-demos/boilerplate-design-system", () => ({
-  Form: ({ children, onAction, ...props }: any) => (
+  Form: ({ children, onAction, ...props }: FormProps) => (
     <form onSubmit={onAction} {...props}>
       {children}
     </form>
   ),
-  Button: ({ children, ...props }: any) => (
+  Button: ({ children, ...props }: ButtonProps) => (
     <button {...props}>{children}</button>
   ),
-  Card: ({ children, collapsable, ...props }: any) => (
-    <div {...props}>{children}</div>
-  ),
+  Card: ({ children, collapsable, ...props }: CardProps) => {
+    void collapsable;
+    return <div {...props}>{children}</div>;
+  },
   useStoreData: vi.fn(),
 }));
 

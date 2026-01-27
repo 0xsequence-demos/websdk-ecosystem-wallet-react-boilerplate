@@ -1,16 +1,23 @@
+import type { ComponentPropsWithoutRef } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { Connected } from "../../src/views/Connected";
+
+type CardProps = ComponentPropsWithoutRef<"div"> & { collapsable?: boolean };
+type GroupProps = ComponentPropsWithoutRef<"div">;
 
 vi.mock("wagmi", () => ({
   useAccount: vi.fn(),
 }));
 
 vi.mock("@0xsequence-demos/boilerplate-design-system", () => ({
-  Card: ({ children, collapsable, ...props }: any) => (
+  Card: ({ children, collapsable, ...props }: CardProps) => {
+    void collapsable;
+    return <div {...props}>{children}</div>;
+  },
+  Group: ({ children, ...props }: GroupProps) => (
     <div {...props}>{children}</div>
   ),
-  Group: ({ children, ...props }: any) => <div {...props}>{children}</div>,
 }));
 
 vi.mock("../../src/components/TestSignMessage", () => ({
