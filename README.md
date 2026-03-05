@@ -20,6 +20,16 @@ The app will start on `localhost:4444`
 
 To provide your own keys from [Sequence Builder](https://sequence.build/), simply edit the `.env` file accordingly. You'll also need the URL for your Ecosystem Wallet.
 
+Recommended env vars:
+
+```env
+VITE_SEQUENCE_PROJECT_ACCESS_KEY=...
+VITE_WALLET_APP_URL=...
+VITE_ENABLE_IMPLICIT_SESSION=false
+```
+
+For hosted deployments (for example Cloudflare), make sure these vars are also configured in your deployment environment and that the deployed origin is allowed in Sequence Builder.
+
 ## Testing
 
 Unit tests (Vitest):

@@ -1,4 +1,5 @@
-import { Chain } from "viem";
+import { createContractPermission, useExplicitSessions } from "@0xsequence/connect";
+import { Chain, parseEther } from "viem";
 import { useWalletClient, useWriteContract } from "wagmi";
 import chains from "../constants";
 import {
@@ -25,10 +26,85 @@ const awardAbi = [
 ] as const;
 const demoTokenUri =
   "https://dev-metadata.sequence.app/projects/277/collections/62/tokens/0.json";
+const SIGNER_NOT_SUPPORTED_ERROR = "No signer supported for call";
+const CHAIN_MANAGER_INIT_ERROR = "ChainSessionManager for chain";
+const NO_SESSION_ERROR = "No sessions are available for the requested action";
+const MISSING_PERMISSION_ERROR = "Missing permission for transaction";
+const REQUEST_ABORTED_ERROR = "Request aborted";
+const mintPermission = createContractPermission({
+  address: mintContractAddress,
+  functionSignature: "function awardItem(address player, string tokenURI)",
+});
+const mintSessionParams = {
+  nativeTokenSpending: {
+    valueLimit: parseEther("0.01"),
+  },
+  expiresIn: {
+    hours: 24,
+  },
+  permissions: [mintPermission],
+};
+
+const pause = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const isSessionError = (message: string) =>
+  message.includes(CHAIN_MANAGER_INIT_ERROR) ||
+  message.includes(NO_SESSION_ERROR) ||
+  message.includes(MISSING_PERMISSION_ERROR) ||
+  message.includes(SIGNER_NOT_SUPPORTED_ERROR);
+
+const isRequestAbortedError = (error: Error) =>
+  error.message.includes(REQUEST_ABORTED_ERROR) ||
+  error.name === "AbortError";
+
+const collectErrorMessages = (error: unknown): string[] => {
+  const queue: unknown[] = [error];
+  const seen = new Set<unknown>();
+  const messages: string[] = [];
+
+  while (queue.length > 0) {
+    const current = queue.shift();
+    if (!current || seen.has(current)) {
+      continue;
+    }
+    seen.add(current);
+
+    if (typeof current === "string") {
+      messages.push(current);
+      continue;
+    }
+
+    if (typeof current === "object") {
+      const candidate = current as Record<string, unknown>;
+      const keys = ["message", "shortMessage", "details", "name"] as const;
+      for (const key of keys) {
+        const value = candidate[key];
+        if (typeof value === "string" && value.trim().length > 0) {
+          messages.push(value);
+        }
+      }
+      if (candidate.cause) {
+        queue.push(candidate.cause);
+      }
+      if (candidate.error) {
+        queue.push(candidate.error);
+      }
+    }
+  }
+
+  return [...new Set(messages)];
+};
+
 const getExplorerTxUrl = (chain: number | undefined, hash: string) => {
   if (chain === 421614) return `https://sepolia.arbiscan.io/tx/${hash}`;
   if (chain === 42161) return `https://arbiscan.io/tx/${hash}`;
   return `https://etherscan.io/tx/${hash}`;
+};
+
+const isLocalOrigin = () => {
+  if (typeof window === "undefined") return false;
+  const host = window.location.hostname;
+  return host === "localhost" || host === "127.0.0.1";
 };
 
 interface TxnRespose {
@@ -42,6 +118,8 @@ const TestMintNFT = (props: { chainId: number }) => {
   const { data: walletClient } = useWalletClient();
   const { chainId } = props;
   const { writeContractAsync, isPending } = useWriteContract();
+  const { addExplicitSession, getExplicitSessions, isLoading: isSessionLoading } =
+    useExplicitSessions();
 
   // Get chain information using chainId
   const network = chains.find((chain) => chain.id === chainId);
@@ -72,7 +150,44 @@ const TestMintNFT = (props: { chainId: number }) => {
       };
     }
 
+    const walletChainId = walletClient.chain?.id;
+    if (walletChainId && walletChainId !== chainId) {
+      return {
+        data: {
+          error: "Wallet network is still switching.",
+          message: `Wallet client is on chain ${walletChainId}, but account is on chain ${chainId}. Wait a second and try minting again.`,
+          hash: null,
+          network,
+        },
+        persist: true,
+      };
+    }
+
+    const ensureChainSession = async (force = false) => {
+      const explicitSessions = await getExplicitSessions();
+      const hasChainSession = explicitSessions.some(
+        (session) => session.chainId === chainId,
+      );
+      if (!hasChainSession || force) {
+        await addExplicitSession({
+          chainId,
+          ...mintSessionParams,
+        });
+      }
+    };
+
+    const sendMintTx = async (account: `0x${string}`) =>
+      writeContractAsync({
+        address: mintContractAddress,
+        abi: awardAbi,
+        functionName: "awardItem",
+        args: [account, demoTokenUri],
+        chainId,
+      });
+
     try {
+      await ensureChainSession();
+
       const [account] = await walletClient.getAddresses();
       if (!account) {
         return {
@@ -86,20 +201,56 @@ const TestMintNFT = (props: { chainId: number }) => {
         };
       }
 
-      const hash = await writeContractAsync({
-        address: mintContractAddress,
-        abi: awardAbi,
-        functionName: "awardItem",
-        args: [account as `0x${string}`, demoTokenUri],
-      });
+      let hash: `0x${string}`;
+      try {
+        hash = await sendMintTx(account as `0x${string}`);
+      } catch (firstError) {
+        const first = firstError as Error;
+        if (isRequestAbortedError(first)) {
+          await pause(500);
+          await ensureChainSession(true);
+          await pause(750);
+
+          try {
+            hash = await sendMintTx(account as `0x${string}`);
+          } catch (secondError) {
+            const second = secondError as Error;
+            if (isRequestAbortedError(second)) {
+              await pause(1000);
+              hash = await sendMintTx(account as `0x${string}`);
+            } else {
+              throw second;
+            }
+          }
+        } else if (isSessionError(first.message)) {
+          await ensureChainSession(true);
+          hash = await sendMintTx(account as `0x${string}`);
+        } else {
+          throw first;
+        }
+      }
 
       return { data: { hash, network }, persist: true };
     } catch (e) {
       const error = e as Error;
+      const rawErrorDetails = collectErrorMessages(e)
+        .filter((msg) => msg !== "Error")
+        .join(" | ");
+      const txErrorMessage =
+        error.message.includes(CHAIN_MANAGER_INIT_ERROR) ||
+        error.message.includes(NO_SESSION_ERROR)
+          ? "No active signing session is available on this chain. Disconnect and reconnect the wallet so the explicit mint session can be created."
+          : error.message.includes(MISSING_PERMISSION_ERROR)
+            ? "Session permissions for this chain are missing or expired. Disconnect and reconnect to approve mint permissions again."
+          : error.message.includes(SIGNER_NOT_SUPPORTED_ERROR)
+            ? "No signer is available for this contract call. Reconnect and approve the mint session. If this persists in deployment, verify env vars (project access key + wallet URL) and allowed origins in Sequence Builder."
+            : error.message.includes(REQUEST_ABORTED_ERROR)
+              ? `The request was aborted before the relayer responded. Retry after a short wait.${isLocalOrigin() ? ` Localhost hint: ensure ${window.location.origin} is allowed in Sequence Builder (project access key + wallet allowed origins), and that local env uses the same key/wallet URL as deployment.` : ""} Details: ${rawErrorDetails}`
+            : error.message;
       return {
         data: {
           error: "Unsuccessful transaction",
-          message: error.message,
+          message: txErrorMessage,
           hash: null,
           network,
         },
@@ -138,9 +289,15 @@ const TestMintNFT = (props: { chainId: number }) => {
             variant="primary"
             subvariants={{ padding: "comfortable" }}
             className="self-start disabled:opacity-50 contents-layered"
-            disabled={isPending || !mintChainOkForMint}
+            disabled={isPending || isSessionLoading || !mintChainOkForMint}
           >
-            <span>{!isPending ? `Mint NFT` : `Minting...`}</span>
+            <span>
+              {isSessionLoading
+                ? "Preparing session..."
+                : isPending
+                  ? "Minting..."
+                  : "Mint NFT"}
+            </span>
           </Button>
         </Form>
       </Card>

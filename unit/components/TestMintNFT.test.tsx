@@ -8,6 +8,11 @@ vi.mock("wagmi", () => ({
   useWriteContract: vi.fn(),
 }));
 
+vi.mock("@0xsequence/connect", () => ({
+  createContractPermission: vi.fn(() => ({})),
+  useExplicitSessions: vi.fn(),
+}));
+
 type FormProps = ComponentPropsWithoutRef<"form"> & {
   onAction?: FormEventHandler<HTMLFormElement>;
 };
@@ -31,10 +36,12 @@ vi.mock("@0xsequence-demos/boilerplate-design-system", () => ({
 }));
 
 import { useWalletClient, useWriteContract } from "wagmi";
+import { useExplicitSessions } from "@0xsequence/connect";
 import { useStoreData } from "@0xsequence-demos/boilerplate-design-system";
 
 const useWalletClientMock = vi.mocked(useWalletClient);
 const useWriteContractMock = vi.mocked(useWriteContract);
+const useExplicitSessionsMock = vi.mocked(useExplicitSessions);
 const useStoreDataMock = vi.mocked(useStoreData);
 
 beforeEach(() => {
@@ -46,6 +53,13 @@ beforeEach(() => {
   useWriteContractMock.mockReturnValue({
     writeContractAsync: vi.fn(),
     isPending: false,
+  });
+  useExplicitSessionsMock.mockReturnValue({
+    addExplicitSession: vi.fn(),
+    getExplicitSessions: vi.fn().mockResolvedValue([]),
+    isLoading: false,
+    error: null,
+    modifyExplicitSession: vi.fn(),
   });
 });
 

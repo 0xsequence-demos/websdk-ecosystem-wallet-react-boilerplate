@@ -4,6 +4,14 @@ const projectAccessKey =
   import.meta.env.VITE_SEQUENCE_PROJECT_ACCESS_KEY ||
   import.meta.env.VITE_PROJECT_ACCESS_KEY;
 const walletUrl = import.meta.env.VITE_WALLET_APP_URL;
+const enableImplicitSession =
+  import.meta.env.VITE_ENABLE_IMPLICIT_SESSION === "true";
+
+if (!projectAccessKey) {
+  throw new Error(
+    "Missing VITE_SEQUENCE_PROJECT_ACCESS_KEY (or VITE_PROJECT_ACCESS_KEY). Set it in your .env/.deployment env.",
+  );
+}
 
 if (!walletUrl) {
   throw new Error(
@@ -26,5 +34,5 @@ export const config = createConfig({
   appName: "WebSDK Starter",
   walletUrl,
   dappOrigin: window.location.origin,
-  enableImplicitSession: true,
+  enableImplicitSession,
 });
